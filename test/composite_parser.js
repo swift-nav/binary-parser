@@ -402,4 +402,36 @@ describe('Composite parser', function(){
             }
         });
     });
+
+    describe('User Defined Types', function() {
+        it('should parse user defined type', function() {
+            Parser.defineType('vlq', function() {
+                var ret = 0;
+                do {
+                    var b = buffer.readUInt8(offset++);
+                    ret = (ret << 7) | (b & 0x7f);
+                } while (b & 0x80);
+                return ret;
+            });
+            var parser = new Parser().vlq('val');
+
+            assert.deepEqual(
+                {val: 0x00000000},
+                parser.parse(new Buffer('00', 'hex'))
+            );
+
+            assert.deepEqual(
+                {val: 0x00002000},
+                parser.parse(new Buffer('c000', 'hex'))
+            );
+            assert.deepEqual(
+                {val: 0x001fffff},
+                parser.parse(new Buffer('ffff7f', 'hex'))
+            );
+            assert.deepEqual(
+                {val: 0x00200000},
+                parser.parse(new Buffer('81808000', 'hex'))
+            );
+        });
+    });
 });
