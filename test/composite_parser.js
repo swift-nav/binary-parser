@@ -405,6 +405,7 @@ describe('Composite parser', function(){
 
     describe('User Defined Types', function() {
         it('should parse user defined type', function() {
+            // VLQ used in MIDI format
             Parser.defineType('vlq', function() {
                 var ret = 0;
                 do {
@@ -431,6 +432,18 @@ describe('Composite parser', function(){
             assert.deepEqual(
                 {val: 0x00200000},
                 parser.parse(new Buffer('81808000', 'hex'))
+            );
+        });
+
+        it('should parse user defined type with options', function() {
+            Parser.defineType('dummy', function(options) {
+                return options.dummyval;
+            })
+            var parser = new Parser().dummy('val', {dummyval: 123});
+
+            assert.deepEqual(
+                {val: 123},
+                parser.parse(new Buffer('0000', 'hex'))
             );
         });
     });
